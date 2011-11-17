@@ -8,7 +8,7 @@ import markdown
 import re
 import sys
 import string
-from os import path
+import os
 
 
 template = '''<!DOCTYPE html>
@@ -54,7 +54,7 @@ def main():
     iwi_ext = IwiWikiExtension()
     md = markdown.Markdown(extensions=['extra',iwi_ext])
     in_fn = sys.argv[1]
-    title = path.splitext(path.basename(in_fn))[0]
+    title = os.path.splitext(os.path.basename(in_fn))[0]
     tm = string.Template(template)
     with open(in_fn, 'r') as f:
         d = f.read()
