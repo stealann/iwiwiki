@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+
+'''
+iwiWiki - a wiki compiler
+'''
+
+import markdown
+import re
+import sys
+import string
+from os import path
+
+
+template = '''<!DOCTYPE html>
+<html>
+    <head>
+        <title>$title</title>
+    </head>
+    <body>
+        $body
+    </body>
+</html>
+'''
+
+
+class WikiLinks(markdown.inlinepatterns.Pattern):
+    def __init__(self, pattern, markdown_instance = None):
+        markdown.inlinepatterns.Pattern.__init__(self, pattern, markdown_instance)
+
+    def handleMatch(self, m):
+        label = m.group(2).strip()
+        url = '%s.html' % label
+        a = markdown.etree.Element('a')
+        a.text = label
+        a.set('href', url)
+        a.set('class', 'wikilink')
+        return a
+
+
+class IwiWikiExtension(markdown.Extension):
+    def __init__(self):
+        pass
+
+    def extendMarkdown(self, md, md_globals):
+        self.md = md
+
+        # append to end of inline patterns
+        WIKILINK_RE = r'\[\[([^\]]+)\]\]'
+        wikilinkPattern = WikiLinks(WIKILINK_RE, md)
+        md.inlinePatterns.add('wikilink', wikilinkPattern, "<not_strong")
+
+
+def main():
+    iwi_ext = IwiWikiExtension()
+    md = markdown.Markdown(extensions=['extra',iwi_ext])
+    in_fn = sys.argv[1]
+    title = path.splitext(path.basename(in_fn))[0]
+    tm = string.Template(template)
+    with open(in_fn, 'r') as f:
+        d = f.read()
+        body = md.convert(d)
+        s = tm.substitute({'body': body, 'title': title})
+    sys.stdout.write(s)
+
+if __name__ == "__main__":
+    main()
