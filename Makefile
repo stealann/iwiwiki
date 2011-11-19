@@ -5,6 +5,8 @@ ATTDIRS := $(shell find . \( -type d -name '*.att' -print \))
 OUTPUT_DIR := ../html
 IWIWIKI := ./iwiwiki
 
+.DELETE_ON_ERROR:
+
 .PHONY: all
 all: create-dirs link-att-dirs $(OBJS)
 
