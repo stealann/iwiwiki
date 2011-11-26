@@ -17,6 +17,7 @@ template = '''<!DOCTYPE html>
         <title>$title</title>
     </head>
     <body>
+        $pathnav<hr />
         $body
     </body>
 </html>
@@ -50,6 +51,33 @@ class IwiWikiExtension(markdown.Extension):
         md.inlinePatterns.add('wikilink', wikilinkPattern, "<not_strong")
 
 
+def create_pathnav(path):
+    path = os.path.normpath(path)
+    root = markdown.etree.Element('p')
+    a = markdown.etree.Element('a')
+    l = len(path.split(os.sep)) - 1
+    a.text = 'Top'
+    a.set('href', '../' * l + 'index.html')
+    root.append(a)
+    for i, p in enumerate(os.path.dirname(path).split(os.sep)):
+        if p == '':
+            break
+        s = markdown.etree.Element('span')
+        s.text = ' / '
+        root.append(s)
+        a = markdown.etree.Element('a')
+        a.text = p
+        a.set('href', '../' * (l - i) + p + '.html')
+        root.append(a)
+    s = markdown.etree.Element('span')
+    s.text = ' / '
+    root.append(s)
+    s = markdown.etree.Element('span')
+    s.text = os.path.splitext(os.path.basename(path))[0]
+    root.append(s)
+    return markdown.etree.tostring(root)
+
+
 def main():
     iwi_ext = IwiWikiExtension()
     md = markdown.Markdown(extensions=['extra',iwi_ext])
@@ -59,7 +87,11 @@ def main():
     with open(in_fn, 'r') as f:
         d = f.read()
         body = md.convert(d)
-        s = tm.substitute({'body': body, 'title': title})
+        s = tm.substitute({
+            'body': body,
+            'title': title,
+            'pathnav': create_pathnav(in_fn),
+        })
     sys.stdout.write(s)
 
 if __name__ == "__main__":
