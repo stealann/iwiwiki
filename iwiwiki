@@ -9,6 +9,7 @@ import re
 import sys
 import string
 import os
+from datetime import datetime
 
 
 template = '''<!DOCTYPE html>
@@ -19,6 +20,8 @@ template = '''<!DOCTYPE html>
     <body>
         $pathnav<hr />
         $body
+        <hr />
+        compile_time:$compile_time
     </body>
 </html>
 '''
@@ -91,6 +94,7 @@ def main():
             'body': body,
             'title': title,
             'pathnav': create_pathnav(in_fn),
+            'compile_time': datetime.now().ctime(),
         })
     sys.stdout.write(s)
 
