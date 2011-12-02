@@ -7,6 +7,7 @@ iwiWiki - a wiki compiler
 import markdown
 import re
 import sys
+import codecs
 import string
 import os
 from datetime import datetime
@@ -15,6 +16,7 @@ from datetime import datetime
 template = '''<!DOCTYPE html>
 <html>
     <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>$title</title>
     </head>
     <body>
@@ -84,10 +86,10 @@ def create_pathnav(path):
 def main():
     iwi_ext = IwiWikiExtension()
     md = markdown.Markdown(extensions=['extra',iwi_ext])
-    in_fn = sys.argv[1]
+    in_fn = sys.argv[1].decode('utf-8')
     title = os.path.splitext(os.path.basename(in_fn))[0]
     tm = string.Template(template)
-    with open(in_fn, 'r') as f:
+    with codecs.open(in_fn, 'r', 'utf-8') as f:
         d = f.read()
         body = md.convert(d)
         s = tm.substitute({
@@ -96,7 +98,8 @@ def main():
             'pathnav': create_pathnav(in_fn),
             'compile_time': datetime.now().ctime(),
         })
-    sys.stdout.write(s)
+    out = codecs.getwriter('utf-8')(sys.stdout)
+    out.write(s)
 
 if __name__ == "__main__":
     main()
